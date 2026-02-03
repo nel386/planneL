@@ -48,6 +48,9 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
     setRules(nextRules);
   };
 
+  const sortTransactions = (items: Transaction[]) =>
+    [...items].sort((a, b) => b.date.localeCompare(a.date));
+
   const refresh = async () => {
     setLoading(true);
     try {
@@ -68,7 +71,7 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
       if (items?.length) {
         await insertReceiptItems(id, items);
       }
-      await refresh();
+      setTransactions((prev) => sortTransactions([transaction, ...prev.filter((entry) => entry.id !== id)]));
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'No se pudo guardar el gasto.');
@@ -78,7 +81,9 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
   const editTransaction = async (payload: Transaction) => {
     try {
       await updateTransaction(payload);
-      await refresh();
+      setTransactions((prev) =>
+        sortTransactions(prev.map((entry) => (entry.id === payload.id ? payload : entry)))
+      );
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'No se pudo actualizar el gasto.');
@@ -88,7 +93,7 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
   const removeTransaction = async (id: string) => {
     try {
       await deleteTransaction(id);
-      await refresh();
+      setTransactions((prev) => prev.filter((entry) => entry.id !== id));
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'No se pudo eliminar el gasto.');
