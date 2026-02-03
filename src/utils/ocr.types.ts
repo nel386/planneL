@@ -12,7 +12,7 @@ export type OcrResponse = {
   merchant?: string | null;
   date?: string | null;
   total?: number | null;
-  items?: OcrRawItem[] | null;
+  items?: OcrItem[] | null;
   raw_text?: string[] | null;
   confidence?: number | null;
   language?: string | null;
