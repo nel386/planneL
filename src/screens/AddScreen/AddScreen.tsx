@@ -311,7 +311,9 @@ export const AddScreen = () => {
           .slice(0, 8)
           .map((item) => `${item.name} - ${item.price}`)
           .join('\n');
-        setNote(itemsText);
+        if (!note.trim()) {
+          setNote(itemsText);
+        }
 
         const extractedTotal = ocr.total ?? parseTotalFromLines(ocr.raw_text ?? []);
         setOcrTotal(extractedTotal ?? null);
@@ -329,14 +331,25 @@ export const AddScreen = () => {
         }
       }
 
-      setOcrHint(`Detectado (${ocr.language}) con ${Math.round(ocr.confidence * 100)}%`);
+      const languageLabel = ocr.language ?? 'desconocido';
+      const confidenceLabel =
+        ocr.confidence != null && Number.isFinite(ocr.confidence)
+          ? ` con ${Math.round(ocr.confidence * 100)}%`
+          : '';
+      setOcrHint(`Detectado (${languageLabel})${confidenceLabel}`);
       show('OCR completado', 'info');
     } catch (error) {
       console.error(error);
+      const err = error as { message?: string };
+      const message =
+        err?.message && err.message !== 'OCR failed'
+          ? err.message
+          : 'No se pudo leer el ticket. Verifica la conexion y el servicio OCR.';
+      updateDebug('ocrError', { message });
       setOcrHint(null);
       setOcrItems([]);
       setOcrTotal(null);
-      showDialog('OCR fallo', 'No se pudo leer el ticket.');
+      showDialog('OCR fallo', message);
     } finally {
       setOcrLoading(false);
     }
@@ -590,4 +603,3 @@ export const AddScreen = () => {
     </SafeAreaView>
   );
 };
-
