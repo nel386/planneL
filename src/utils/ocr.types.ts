@@ -3,12 +3,17 @@ export type OcrItem = {
   price: number;
 };
 
+export type OcrRawItem = {
+  name: string;
+  price?: number | string | null;
+};
+
 export type OcrResponse = {
-  merchant: string | null;
-  date: string | null;
-  total: number | null;
-  items: OcrItem[];
-  raw_text: string[];
-  confidence: number;
-  language: string;
+  merchant?: string | null;
+  date?: string | null;
+  total?: number | null;
+  items?: OcrRawItem[] | null;
+  raw_text?: string[] | null;
+  confidence?: number | null;
+  language?: string | null;
 };
