@@ -39,8 +39,16 @@ export const getItemsSum = (items: OcrItem[]) =>
   items.reduce((acc, item) => acc + (item.price || 0), 0);
 
 const parseMoney = (value: string) => {
-  const cleaned = value.replace(/[^\d.,-]/g, '').replace(',', '.');
-  const parsed = Number(cleaned);
+  const cleaned = value.replace(/[^\d.,-]/g, '');
+  let normalized = cleaned;
+  const hasDot = cleaned.includes('.');
+  const hasComma = cleaned.includes(',');
+  if (hasDot && hasComma) {
+    normalized = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (hasComma) {
+    normalized = cleaned.replace(',', '.');
+  }
+  const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
 };
 
@@ -62,4 +70,3 @@ export const parseTotalFromLines = (lines: string[]) => {
     .filter((value): value is number => value != null && value > 0);
   return fallback.length ? fallback[fallback.length - 1] : null;
 };
-

@@ -289,6 +289,7 @@ export const AddScreen = () => {
   };
 
   const runOcr = async (uri: string) => {
+    if (ocrLoading) return;
     try {
       setOcrLoading(true);
       setOcrHint('Procesando ticket...');

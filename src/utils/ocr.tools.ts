@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { OCR_BASE_URL } from './config';
 import { getFileName, getMimeType } from './media.tools';
 import { OcrResponse } from './ocr.types';
@@ -5,6 +6,10 @@ import { OcrResponse } from './ocr.types';
 const OCR_TIMEOUT_MS = 20000;
 
 export const uploadReceipt = async (uri: string): Promise<OcrResponse> => {
+  const baseUrl = resolveOcrBaseUrl(OCR_BASE_URL);
+  if (!baseUrl) {
+    throw new Error('OCR no configurado. Define EXPO_PUBLIC_OCR_URL.');
+  }
   const form = new FormData();
   const filename = getFileName(uri);
   const type = getMimeType(uri);
