@@ -5,22 +5,6 @@ import { OcrResponse } from './ocr.types';
 
 const OCR_TIMEOUT_MS = 20000;
 
-const normalizeBaseUrl = (value: string) => {
-  const trimmed = value.trim();
-  if (!trimmed) return trimmed;
-  const withScheme = trimmed.startsWith('http') ? trimmed : `http://${trimmed}`;
-  return withScheme.replace(/\/+$/, '');
-};
-
-const resolveOcrBaseUrl = (value: string) => {
-  const normalized = normalizeBaseUrl(value);
-  if (!normalized) return normalized;
-  if (Platform.OS !== 'android') return normalized;
-  if (normalized.includes('localhost')) return normalized.replace('localhost', '10.0.2.2');
-  if (normalized.includes('127.0.0.1')) return normalized.replace('127.0.0.1', '10.0.2.2');
-  return normalized;
-};
-
 export const uploadReceipt = async (uri: string): Promise<OcrResponse> => {
   const baseUrl = resolveOcrBaseUrl(OCR_BASE_URL);
   if (!baseUrl) {
@@ -38,7 +22,7 @@ export const uploadReceipt = async (uri: string): Promise<OcrResponse> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), OCR_TIMEOUT_MS);
   try {
-    const response = await fetch(`${baseUrl}/ocr/receipt`, {
+    const response = await fetch(`${OCR_BASE_URL}/ocr/receipt`, {
       method: 'POST',
       body: form,
       headers: {
@@ -58,12 +42,7 @@ export const uploadReceipt = async (uri: string): Promise<OcrResponse> => {
     if (err?.name === 'AbortError') {
       throw new Error('OCR timeout. Intenta de nuevo con una conexion mas estable.');
     }
-    const hint =
-      Platform.OS === 'android' && OCR_BASE_URL.includes('localhost')
-        ? 'Si usas emulador Android, utiliza 10.0.2.2.'
-        : undefined;
-    const details = [err?.message, hint].filter(Boolean).join(' ');
-    throw new Error(details || `No se pudo conectar con el OCR (${baseUrl}).`);
+    throw new Error(err?.message || `No se pudo conectar con el OCR (${OCR_BASE_URL}).`);
   } finally {
     clearTimeout(timeout);
   }
