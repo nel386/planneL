@@ -162,6 +162,10 @@ export const AddScreen = () => {
   };
 
   const updateDebug = (label: string, payload: Record<string, unknown>) => {
+    if (!__DEV__) {
+      console.log(`${label} | ${JSON.stringify(payload)}`);
+      return;
+    }
     const stamp = new Date().toISOString();
     const info = `${stamp} | ${label} | ${JSON.stringify(payload)}`;
     setDebugInfo((prev) => {
@@ -526,25 +530,27 @@ export const AddScreen = () => {
           )}
         </View>
 
-        <View style={styles.debugCard}>
-          <Text style={styles.debugTitle}>Diagnostico permisos</Text>
-          <Text style={styles.debugText}>
-            {debugInfo ?? 'Pulsa Camara o Galeria para ver el log aqui.'}
-          </Text>
-          <Pressable
-            style={styles.debugButton}
-            onPress={async () => {
-              const lib = await ImagePicker.getMediaLibraryPermissionsAsync();
-              const cam = await ImagePicker.getCameraPermissionsAsync();
-              updateDebug('currentPermissions', { mediaLibrary: lib, camera: cam });
-            }}
-          >
-            <Text style={styles.debugButtonText}>Revisar permisos ahora</Text>
-          </Pressable>
-          <Pressable style={styles.debugLink} onPress={() => Linking.openSettings()}>
-            <Text style={styles.debugLinkText}>Abrir ajustes del sistema</Text>
-          </Pressable>
-        </View>
+        {__DEV__ ? (
+          <View style={styles.debugCard}>
+            <Text style={styles.debugTitle}>Diagnostico permisos</Text>
+            <Text style={styles.debugText}>
+              {debugInfo ?? 'Pulsa Camara o Galeria para ver el log aqui.'}
+            </Text>
+            <Pressable
+              style={styles.debugButton}
+              onPress={async () => {
+                const lib = await ImagePicker.getMediaLibraryPermissionsAsync();
+                const cam = await ImagePicker.getCameraPermissionsAsync();
+                updateDebug('currentPermissions', { mediaLibrary: lib, camera: cam });
+              }}
+            >
+              <Text style={styles.debugButtonText}>Revisar permisos ahora</Text>
+            </Pressable>
+            <Pressable style={styles.debugLink} onPress={() => Linking.openSettings()}>
+              <Text style={styles.debugLinkText}>Abrir ajustes del sistema</Text>
+            </Pressable>
+          </View>
+        ) : null}
       </ScrollView>
 
       <BottomSheet
