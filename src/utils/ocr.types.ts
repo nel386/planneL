@@ -3,6 +3,11 @@ export type OcrItem = {
   price: number;
 };
 
+export type OcrRawItem = {
+  name: string;
+  price?: number | string | null;
+};
+
 export type OcrResponse = {
   merchant?: string | null;
   date?: string | null;

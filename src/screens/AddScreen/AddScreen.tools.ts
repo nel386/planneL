@@ -1,8 +1,9 @@
-import { OcrItem } from '../../utils';
+import { OcrItem, OcrRawItem } from '../../utils';
 
-export const normalizePrice = (value?: number) => {
+export const normalizePrice = (value?: number | string | null) => {
   if (value == null) return 0;
-  const rounded = Math.round(value * 100) / 100;
+  const parsed = typeof value === 'string' ? parseMoney(value) ?? 0 : value;
+  const rounded = Math.round(parsed * 100) / 100;
   return Number.isFinite(rounded) ? rounded : 0;
 };
 
@@ -15,7 +16,7 @@ export const normalizeKey = (value: string) =>
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '');
 
-export const normalizeOcrItems = (items: OcrItem[]) =>
+export const normalizeOcrItems = (items: OcrRawItem[]) =>
   items
     .map((item) => ({
       name: normalizeName(item.name),
@@ -23,8 +24,8 @@ export const normalizeOcrItems = (items: OcrItem[]) =>
     }))
     .filter((item) => item.name.length > 0);
 
-export const dedupeOcrItems = (items: OcrItem[]) => {
-  const seen = new Map<string, OcrItem>();
+export const dedupeOcrItems = (items: OcrRawItem[]) => {
+  const seen = new Map<string, OcrRawItem>();
   for (const item of items) {
     const key = `${normalizeKey(item.name)}-${normalizePrice(item.price)}`;
     if (!key.trim()) continue;
@@ -37,6 +38,11 @@ export const dedupeOcrItems = (items: OcrItem[]) => {
 
 export const getItemsSum = (items: OcrItem[]) =>
   items.reduce((acc, item) => acc + (item.price || 0), 0);
+
+const extractMoneyCandidates = (value: string) => {
+  const matches = value.match(/-?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})|-?\d+(?:[.,]\d{2})/g);
+  return matches ?? [];
+};
 
 const parseMoney = (value: string) => {
   const cleaned = value.replace(/[^\d.,-]/g, '');
@@ -58,15 +64,18 @@ export const parseTotalFromLines = (lines: string[]) => {
   for (let i = 0; i < normalized.length; i += 1) {
     const line = normalized[i];
     if (!keywords.some((key) => line.includes(key))) continue;
-    const match = line.match(/(-?\d+[.,]\d{2})/g);
-    if (match?.length) {
-      const parsed = parseMoney(match[match.length - 1]);
-      if (parsed != null && parsed > 0) return parsed;
+    const matches = extractMoneyCandidates(line);
+    const parsedCandidates = matches
+      .map((candidate) => parseMoney(candidate))
+      .filter((value): value is number => value != null && value > 0);
+    if (parsedCandidates.length) {
+      return Math.max(...parsedCandidates);
     }
   }
 
   const fallback = normalized
-    .map((line) => parseMoney(line))
+    .flatMap((line) => extractMoneyCandidates(line))
+    .map((value) => parseMoney(value))
     .filter((value): value is number => value != null && value > 0);
-  return fallback.length ? fallback[fallback.length - 1] : null;
+  return fallback.length ? Math.max(...fallback) : null;
 };
