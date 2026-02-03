@@ -1,1 +1,1 @@
-export { saveImageToApp } from './media.tools';
+export { getFileName, getMimeType, saveImageToApp } from './media.tools';
