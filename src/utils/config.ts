@@ -1,0 +1,1 @@
+export const OCR_BASE_URL = process.env.EXPO_PUBLIC_OCR_URL ?? 'http://localhost:8000';

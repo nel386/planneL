@@ -1,0 +1,2 @@
+export { GoalsScreen } from './GoalsScreen';
+

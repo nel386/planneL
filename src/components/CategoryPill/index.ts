@@ -1,0 +1,3 @@
+export { CategoryPill } from './CategoryPill';
+
+
