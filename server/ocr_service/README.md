@@ -29,6 +29,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 ## Variables de entorno
 - `OCR_LANG`: `auto` (default), `es` o `en`
 - `OCR_USE_ANGLE`: `true`/`false` (default `true`)
+- `OCR_PREPROCESS`: `true`/`false` (default `true`) activa preprocesado de imagen.
+- `OCR_MIN_CONF`: `0.0-1.0` (default `0.45`) filtra textos con baja confianza.
+- `OCR_MAX_SIDE`: tamaño máximo del lado mayor (default `1600`) para redimensionar imágenes grandes.
+- `OCR_UPSCALE_MIN`: mínimo del lado menor (default `900`) para reescalar imágenes pequeñas.
 
 ## Endpoint
 `POST /ocr/receipt`
